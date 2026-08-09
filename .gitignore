@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# environment (contains API keys - never commit!)
+.env
+.env.local
+
+# build output
+dist/
+build/
+
+# runtime data
+backend/data/
+*.log
+
+# misc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
