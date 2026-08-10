@@ -68,18 +68,7 @@ export default function MessageBubble({ message }) {
       <div className="msg-body">
         <div className={`bubble ${isUser ? "bubble--user" : "bubble--bot"}`}>
           <Content text={message.content} />
-          {isUser && !message.content && ""}
         </div>
-        {!isUser && message.sources && message.sources.length > 0 && (
-          <div className="sources">
-            <span className="sources-label">📚 Sources</span>
-            {message.sources.map((s) => (
-              <span className="source-chip" key={s}>
-                {s}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

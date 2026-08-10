@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar.jsx";
 import ChatArea from "./components/ChatArea.jsx";
 import Toasts from "./components/Toasts.jsx";
 import * as api from "./api.js";
+import { CAR_IMAGES } from "./cars.js";
 
 const uid = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -20,6 +21,7 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [streaming, setStreaming] = useState(false);
   const [toasts, setToasts] = useState([]);
+  const [bgCar, setBgCar] = useState(0);
   const historyRef = useRef([]);
 
   const pushToast = useCallback((type, text) => {
@@ -106,13 +108,14 @@ export default function App() {
   }, []);
 
   const handleSend = useCallback(
-    async (text) => {
+    async (text, language) => {
       const clean = (text || "").trim();
       if (!clean || streaming) return;
 
       const userMsg = { id: uid(), role: "user", content: clean, time: Date.now() };
       const botMsg = { id: uid(), role: "assistant", content: "", sources: [], time: Date.now() };
       setMessages((m) => [...m, userMsg, botMsg]);
+      setBgCar((i) => (i + 1) % CAR_IMAGES.length); // show next car animation in the background
       historyRef.current = [...historyRef.current, { role: "user", content: clean }];
       setStreaming(true);
 
@@ -121,6 +124,7 @@ export default function App() {
         await api.streamChat({
           message: clean,
           history: historyRef.current.slice(0, -1),
+          language,
           onSources: (sources) =>
             setMessages((m) =>
               m.map((msg) => (msg.id === botMsg.id ? { ...msg, sources } : msg))
@@ -164,8 +168,8 @@ export default function App() {
       <ChatArea
         messages={messages}
         streaming={streaming}
+        bgCar={bgCar}
         onSend={handleSend}
-        docs={docs}
         status={status}
         onNewChat={handleNewChat}
       />

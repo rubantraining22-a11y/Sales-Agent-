@@ -1,17 +1,6 @@
 import UploadZone from "./UploadZone.jsx";
 import DocumentList from "./DocumentList.jsx";
 
-const TYPE_EMOJI = {
-  pdf: "📄",
-  docx: "📘",
-  txt: "📝",
-  md: "📝",
-  png: "🖼️",
-  jpg: "🖼️",
-  jpeg: "🖼️",
-  link: "🔗",
-};
-
 export default function Sidebar({ docs, status, onUpload, onLink, onDelete, onClear, onNewChat }) {
   const chromaOk = Boolean(status.chroma);
   const llmOk = Boolean(status.llmConfigured);
@@ -23,7 +12,7 @@ export default function Sidebar({ docs, status, onUpload, onLink, onDelete, onCl
         <div className="brand-logo">🚗</div>
         <div className="brand-text">
           <strong>SGA MOTORS</strong>
-          <span>AI Sales Advisor</span>
+          <span>Sales Advisor</span>
         </div>
         <button className="icon-btn" title="New chat" onClick={onNewChat}>
           ✦

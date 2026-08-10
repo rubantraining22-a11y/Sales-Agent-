@@ -107,7 +107,7 @@ app.post("/api/documents/clear", async (_req, res) => {
 
 /* Chat (SSE streaming) */
 app.post("/api/chat", async (req, res) => {
-  const { message, history = [] } = req.body || {};
+  const { message, history = [], language } = req.body || {};
   if (!message || typeof message !== "string" || !message.trim()) {
     return res.status(400).json({ error: "message is required" });
   }
@@ -141,8 +141,8 @@ app.post("/api/chat", async (req, res) => {
 
     const gen =
       docs.length > 0
-        ? streamAnswer({ input: message, history: historyText, contextDocs: docs, signal: controller.signal })
-        : streamRefusal(message, controller.signal);
+        ? streamAnswer({ input: message, history: historyText, contextDocs: docs, signal: controller.signal, language })
+        : streamRefusal(message, controller.signal, language);
 
     for await (const token of gen) send({ token });
     send({ done: true });

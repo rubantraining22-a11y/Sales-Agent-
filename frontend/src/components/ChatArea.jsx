@@ -1,28 +1,59 @@
 import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble.jsx";
 import TypingIndicator from "./TypingIndicator.jsx";
-import SuggestionChips from "./SuggestionChips.jsx";
+import { CAR_IMAGES } from "../cars.js";
 
-const SUGGESTIONS = [
-  { icon: "🚙", text: "Which SUV models do you have?" },
-  { icon: "💸", text: "What are the prices and variants of the Sedan?" },
-  { icon: "🎨", text: "What colors are available for the EV Car?" },
-  { icon: "🔋", text: "Compare the Hatchback and the UV Car." },
-  { icon: "📄", text: "What financing offers are running right now?" },
-  { icon: "🛡️", text: "Tell me about the warranty coverage." },
+const LANGUAGES = [
+  { code: "Auto", label: "Auto detect" },
+  { code: "English", label: "English" },
+  { code: "Tamil", label: "தமிழ் (Tamil)" },
+  { code: "Hindi", label: "हिन्दी (Hindi)" },
+  { code: "Malayalam", label: "മലയാളം (Malayalam)" },
 ];
 
-export default function ChatArea({ messages, streaming, onSend, docs, status, onNewChat }) {
+/** Guess the language from the script used in the message text. */
+function detectLanguage(text) {
+  const t = text || "";
+  if (/[\u0D00-\u0D7F]/.test(t)) return "Malayalam";
+  if (/[\u0B80-\u0BFF]/.test(t)) return "Tamil";
+  if (/[\u0900-\u097F]/.test(t)) return "Hindi";
+  return "English";
+}
+
+const SPEECH_LANG = {
+  English: "en-IN",
+  Tamil: "ta-IN",
+  Hindi: "hi-IN",
+  Malayalam: "ml-IN",
+};
+
+const SpeechRecognition =
+  typeof window !== "undefined"
+    ? window.SpeechRecognition || window.webkitSpeechRecognition
+    : null;
+
+export default function ChatArea({ messages, streaming, bgCar, onSend, status, onNewChat }) {
   const [draft, setDraft] = useState("");
+  const [language, setLanguage] = useState("Auto");
   const [attachOpen, setAttachOpen] = useState(false);
+  const [listening, setListening] = useState(false);
   const fileRef = useRef(null);
   const scrollRef = useRef(null);
   const taRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const voiceTextRef = useRef("");
+  const streamingRef = useRef(streaming);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, streaming]);
+
+  useEffect(() => () => recognitionRef.current?.stop(), []);
+
+  useEffect(() => {
+    streamingRef.current = streaming;
+  }, [streaming]);
 
   const autosize = () => {
     const ta = taRef.current;
@@ -31,30 +62,84 @@ export default function ChatArea({ messages, streaming, onSend, docs, status, on
     ta.style.height = Math.min(ta.scrollHeight, 180) + "px";
   };
 
-  const submit = () => {
-    const text = draft.trim();
-    if (!text || streaming) return;
-    onSend(text);
+  const submitText = (text) => {
+    const clean = (text || "").trim();
+    if (!clean || streamingRef.current) return;
+    const lang = language === "Auto" ? detectLanguage(clean) : language;
+    onSend(clean, lang);
     setDraft("");
+    voiceTextRef.current = "";
     requestAnimationFrame(() => {
       if (taRef.current) taRef.current.style.height = "auto";
     });
   };
 
+  const submit = () => submitText(draft);
+
+  const toggleVoice = () => {
+    if (!SpeechRecognition) return;
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    voiceTextRef.current = "";
+    const rec = new SpeechRecognition();
+    recognitionRef.current = rec;
+    if (language !== "Auto") rec.lang = SPEECH_LANG[language] || "en-IN";
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+
+    let gotFinal = false;
+    rec.onresult = (e) => {
+      let final = "";
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const res = e.results[i];
+        const t = res[0].transcript;
+        if (res.isFinal) {
+          final += t;
+          gotFinal = true;
+        } else {
+          interim += t;
+        }
+      }
+      const text = (final || interim).trim();
+      if (text) {
+        voiceTextRef.current = text;
+        setDraft(text);
+        requestAnimationFrame(autosize);
+      }
+    };
+    rec.onend = () => {
+      setListening(false);
+      const text = voiceTextRef.current;
+      if (gotFinal && text) submitText(text);
+    };
+    rec.onerror = () => setListening(false);
+
+    setListening(true);
+    try {
+      rec.start();
+    } catch {
+      setListening(false);
+    }
+  };
+
   const chromaDown = !status.chroma;
-  const noDocs = docs.length === 0;
-  const showHero = messages.length === 0 && !streaming;
 
   return (
     <main className="chat">
+      <div className="chat-bg" key={bgCar} aria-hidden="true">
+        <img src={CAR_IMAGES[bgCar]} alt="" className="chat-bg-img" />
+      </div>
       <header className="chat-head glass">
         <div className="chat-head-info">
           <div className="chat-avatar">🛞</div>
           <div>
             <strong>SGA</strong>
-            <span className="chat-sub">
-              Your AI car sales advisor · answers only from our catalog
-            </span>
+            <span className="chat-sub">Your car sales advisor</span>
           </div>
         </div>
         <div className="chat-head-actions">
@@ -62,6 +147,17 @@ export default function ChatArea({ messages, streaming, onSend, docs, status, on
             <i className="dot" />
             {chromaDown ? "Chroma offline" : "Chroma ready"}
           </span>
+          <label className="lang-select" title="Answer language">
+            🌐
+            <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+            <span className="lang-caret">▾</span>
+          </label>
           <button className="btn btn-ghost btn-sm" onClick={onNewChat}>
             ✦ New chat
           </button>
@@ -70,37 +166,6 @@ export default function ChatArea({ messages, streaming, onSend, docs, status, on
 
       <div className="chat-scroll" ref={scrollRef}>
         <div className="chat-inner">
-          {showHero && (
-            <div className="hero">
-              <div className="hero-badge">✨ Powered by RAG · LangChain + ChromaDB</div>
-              <h1 className="hero-title">
-                Find your <span className="grad-text">perfect car</span> today
-              </h1>
-              <p className="hero-sub">
-                Ask SGA about our lineup — models, specs, colors, variants, prices,
-                financing and test drives. Everything is grounded in the brochures
-                you upload.
-              </p>
-              {chromaDown && (
-                <div className="warn-banner">
-                  ⚠️ ChromaDB is offline — start it with <code>docker compose up -d</code>,
-                  then upload your brochures.
-                </div>
-              )}
-              {!chromaDown && noDocs && (
-                <div className="warn-banner warn-banner--info">
-                  💡 No brochures in the knowledge base yet — upload one from the sidebar,
-                  or try the included sample: <code>npm run ingest -- ../sample-data</code>
-                </div>
-              )}
-              <SuggestionChips
-                suggestions={SUGGESTIONS}
-                onPick={(t) => onSend(t)}
-                disabled={chromaDown || noDocs || streaming}
-              />
-            </div>
-          )}
-
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />
           ))}
@@ -142,6 +207,55 @@ export default function ChatArea({ messages, streaming, onSend, docs, status, on
               }
             }}
           />
+          {SpeechRecognition && (
+            <button
+              className={`btn-mic ${listening ? "btn-mic--live" : ""}`}
+              title={listening ? "Stop listening" : "Speak your question"}
+              aria-label={listening ? "Stop listening" : "Speak your question"}
+              onClick={toggleVoice}
+              disabled={streaming}
+            >
+              {listening ? (
+                <svg
+                  className="btn-mic-ico"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <rect x="6.5" y="6.5" width="11" height="11" rx="2.5" />
+                </svg>
+              ) : (
+                <svg
+                  className="btn-mic-ico"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
+                  <path d="M5 11a7 7 0 0 0 14 0" />
+                  <path d="M12 18v3.5" />
+                  <path d="M8.5 21.5h7" />
+                </svg>
+              )}
+            </button>
+          )}
+          {listening && (
+            <div className="voice-hint">
+              <span className="waveform" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              Listening… speak now
+            </div>
+          )}
           <button
             className="btn-send"
             title="Send"

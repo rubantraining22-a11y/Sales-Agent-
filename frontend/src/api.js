@@ -41,11 +41,11 @@ export async function uploadLink(url, name) {
  * Stream a chat answer over SSE.
  * Events: { sources: [] }, { token }, { done }, { error }
  */
-export async function streamChat({ message, history, onSources, onToken }) {
+export async function streamChat({ message, history, language, onSources, onToken }) {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, history }),
+    body: JSON.stringify({ message, history, language }),
   });
   if (!res.ok || !res.body) {
     let msg = "Chat request failed";

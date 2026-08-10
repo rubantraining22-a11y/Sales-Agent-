@@ -16,13 +16,27 @@ STRICT RULES — follow them without exception:
 
 const ANSWER_TEMPLATE = ChatPromptTemplate.fromMessages([
   ["system", PERSONA + STRICT_RULES],
-  ["human", "Reference documents:\n{context}\n\nPrevious conversation:\n{history}\n\nCustomer question:\n{input}\n\nYour answer:"],
+  ["human", "Reference documents:\n{context}\n\nPrevious conversation:\n{history}\n\nCustomer question:\n{input}\n\n{language}Your answer:"],
 ]);
 
 const REFUSAL_TEMPLATE = ChatPromptTemplate.fromMessages([
   ["system", `${PERSONA}\nThe customer's question is NOT covered by your brochure documents. Politely decline to answer it, explain that you can only answer questions about the vehicles in our catalog (models, specs, colors, variants, prices, financing, warranty, test drives), and warmly invite them to ask about our lineup. Do not answer the question itself.`],
-  ["human", "Customer question: {input}\n\nYour reply:"],
+  ["human", "Customer question: {input}\n\n{language}Your reply:"],
 ]);
+
+const LANGUAGE_MAP = {
+  English: "",
+  Tamil: "Answer the customer in Tamil (தமிழ்) — write your entire reply in Tamil.",
+  Hindi: "Answer the customer in Hindi (हिन्दी) — write your entire reply in Hindi.",
+  Malayalam: "Answer the customer in Malayalam (മലയാളം) — write your entire reply in Malayalam.",
+};
+
+/** Returns an instruction for the LLM, or empty string for English (no instruction needed). */
+export function languageInstruction(language) {
+  const ins = LANGUAGE_MAP[language] || "";
+  if (!ins) return "";
+  return `\nLANGUAGE — the customer wants the reply in a specific language. Follow it strictly:\n- ${ins}\n- You may keep model names, prices and technical terms in English where natural.\n`;
+}
 
 let llm;
 
@@ -56,11 +70,12 @@ export async function retrieveRelevantContext(query) {
   return { docs, scored };
 }
 
-export async function* streamAnswer({ input, history, contextDocs, signal }) {
+export async function* streamAnswer({ input, history, contextDocs, signal, language }) {
   const prompt = await ANSWER_TEMPLATE.invoke({
     context: formatContext(contextDocs),
     history: history || "",
     input,
+    language: languageInstruction(language),
   });
   const stream = await getLlm().stream(prompt, { signal });
   for await (const chunk of stream) {
@@ -69,8 +84,11 @@ export async function* streamAnswer({ input, history, contextDocs, signal }) {
   }
 }
 
-export async function* streamRefusal(input, signal) {
-  const prompt = await REFUSAL_TEMPLATE.invoke({ input });
+export async function* streamRefusal(input, signal, language) {
+  const prompt = await REFUSAL_TEMPLATE.invoke({
+    input,
+    language: languageInstruction(language),
+  });
   const stream = await getLlm().stream(prompt, { signal });
   for await (const chunk of stream) {
     const text = typeof chunk.content === "string" ? chunk.content : "";
