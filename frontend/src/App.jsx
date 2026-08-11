@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatArea from "./components/ChatArea.jsx";
 import Toasts from "./components/Toasts.jsx";
+import LoginModal from "./components/LoginModal.jsx";
 import * as api from "./api.js";
 import { CAR_IMAGES } from "./cars.js";
 
@@ -22,6 +23,14 @@ export default function App() {
   const [streaming, setStreaming] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [bgCar, setBgCar] = useState(0);
+  
+  /* Auth State */
+  const [currentUser, setCurrentUser] = useState(
+    () => localStorage.getItem("sga_user") || ""
+  );
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const isAuthenticated = Boolean(currentUser);
+
   const historyRef = useRef([]);
 
   const pushToast = useCallback((type, text) => {
@@ -29,6 +38,21 @@ export default function App() {
     setToasts((t) => [...t, { id, type, text }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 5200);
   }, []);
+
+  const handleLoginSuccess = useCallback(
+    (username) => {
+      setCurrentUser(username);
+      localStorage.setItem("sga_user", username);
+      pushToast("success", `Welcome back, ${username}! Admin upload unlocked.`);
+    },
+    [pushToast]
+  );
+
+  const handleLogout = useCallback(() => {
+    setCurrentUser("");
+    localStorage.removeItem("sga_user");
+    pushToast("info", "Logged out of admin document management.");
+  }, [pushToast]);
 
   const refresh = useCallback(async () => {
     try {
@@ -164,6 +188,11 @@ export default function App() {
         onDelete={handleDelete}
         onClear={handleClear}
         onNewChat={handleNewChat}
+        currentUser={currentUser}
+        isAuthenticated={isAuthenticated}
+        onRequireLogin={() => setIsLoginModalOpen(true)}
+        onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
       />
       <ChatArea
         messages={messages}
@@ -174,6 +203,12 @@ export default function App() {
         onNewChat={handleNewChat}
       />
       <Toasts toasts={toasts} />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 # dependencies
-node_modules/
+node_modules/   
 
 # environment (contains API keys - never commit!)
 .env
@@ -18,3 +18,7 @@ backend/data/
 Thumbs.db
 .vscode/
 .idea/
+.env/
+chromadb-admin
+chroma-data/
+.environment
