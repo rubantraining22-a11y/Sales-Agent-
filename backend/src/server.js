@@ -155,12 +155,22 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.get("/", (_req, res) => {
-  res.json({
-    service: "sales-agent-backend",
-    endpoints: ["/api/health", "/api/documents/upload", "/api/documents/link", "/api/documents", "/api/documents/:id", "/api/documents/clear", "/api/chat"],
+/* Serve frontend static files in production if built */
+const frontendDist = path.resolve(__dirname, "../../frontend/dist");
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(frontendDist, "index.html"));
   });
-});
+} else {
+  app.get("/", (_req, res) => {
+    res.json({
+      service: "sales-agent-backend",
+      endpoints: ["/api/health", "/api/documents/upload", "/api/documents/link", "/api/documents", "/api/documents/:id", "/api/documents/clear", "/api/chat"],
+    });
+  });
+}
 
 /* JSON error handler (multer limits, unexpected errors, async route throws) */
 app.use((err, _req, res, _next) => {

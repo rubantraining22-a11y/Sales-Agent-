@@ -1,0 +1,28 @@
+services:
+  # 1. ChromaDB Service (Docker Web Service)
+  - type: web
+    name: sales-agent-chroma
+    runtime: docker
+    plan: free
+    envVars:
+      - key: IS_PERSISTENT
+        value: "TRUE"
+      - key: ALLOW_RESET
+        value: "TRUE"
+
+  # 2. Sales Agent Node.js Web Service (Full-stack App)
+  - type: web
+    name: sales-agent-app
+    env: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: CHROMA_URL
+        value: http://sales-agent-chroma:8000
+      - key: EMBEDDING_MODEL
+        value: Xenova/all-MiniLM-L6-v2
