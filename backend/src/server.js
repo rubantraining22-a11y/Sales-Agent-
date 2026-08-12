@@ -4,11 +4,15 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 import { ingestLocalFile, ingestUrl } from "./lib/ingest.js";
 import { deleteByIds, clearCollection, isChromaAvailable } from "./lib/vectorStore.js";
 import { listDocuments, removeDocument, clearDocuments, chunkIdsFor } from "./lib/registry.js";
 import { retrieveRelevantContext, streamAnswer, streamRefusal } from "./lib/rag.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
