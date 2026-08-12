@@ -26,3 +26,5 @@ services:
         value: http://sales-agent-chroma:8000
       - key: EMBEDDING_MODEL
         value: Xenova/all-MiniLM-L6-v2
+      - key: ONNXRUNTIME_NODE_INSTALL_CUDA
+        value: "skip"
