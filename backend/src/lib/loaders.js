@@ -1,5 +1,6 @@
+import fs from "node:fs/promises";
+import pdfParse from "pdf-parse";
 import path from "node:path";
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx";
 import { TextLoader } from "@langchain/classic/document_loaders/fs/text";
 import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
@@ -19,11 +20,20 @@ export function getSplitter() {
   });
 }
 
+async function loadPdf(filePath) {
+  const buffer = await fs.readFile(filePath);
+  const data = await pdfParse(buffer);
+  const text = (data.text || "").trim();
+  return text
+    ? [{ pageContent: text, metadata: { source: path.basename(filePath) } }]
+    : [];
+}
+
 async function loadWithLangChain(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   switch (ext) {
     case ".pdf":
-      return new PDFLoader(filePath, { splitPages: false }).load();
+      return loadPdf(filePath);
     case ".docx":
       return new DocxLoader(filePath).load();
     case ".txt":
