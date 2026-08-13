@@ -1502,4 +1502,147 @@ body::before {
   color: #d97706;
 }
 
+/* ── Lead Capture Modal & Callout Styles ────────────────────────── */
+.lead-modal-box {
+  max-width: 520px;
+}
+
+.modal-header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(79, 70, 229, 0.12);
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--fg);
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.modal-error-alert {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fg);
+}
+
+.form-group label .req {
+  color: #ef4444;
+}
+
+.form-group input,
+.form-group textarea {
+  background: #ffffff !important;
+  color: #0d1424 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: var(--r-sm);
+  padding: 9px 12px;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
+  outline: none;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lead-trigger-btn {
+  background: var(--grad-accent) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3) !important;
+  border: none !important;
+}
+
+.lead-trigger-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(6, 182, 212, 0.45) !important;
+}
+
+/* Inline bot message lead card */
+.msg-lead-card {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px dashed rgba(79, 70, 229, 0.3);
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.msg-lead-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.msg-lead-btn {
+  font-size: 11.5px !important;
+  padding: 5px 12px !important;
+  font-weight: 700 !important;
+}
+
+
 

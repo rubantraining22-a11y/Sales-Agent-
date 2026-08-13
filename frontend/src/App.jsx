@@ -3,6 +3,7 @@ import Sidebar from "./components/Sidebar.jsx";
 import ChatArea from "./components/ChatArea.jsx";
 import Toasts from "./components/Toasts.jsx";
 import LoginModal from "./components/LoginModal.jsx";
+import LeadModal from "./components/LeadModal.jsx";
 import * as api from "./api.js";
 import { CAR_IMAGES } from "./cars.js";
 
@@ -31,7 +32,16 @@ export default function App() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isAuthenticated = Boolean(currentUser);
 
+  /* Lead Capture Modal State */
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [leadDefaultModel, setLeadDefaultModel] = useState("");
+
   const historyRef = useRef([]);
+
+  const handleOpenLeadModal = useCallback((modelName = "") => {
+    setLeadDefaultModel(modelName);
+    setIsLeadModalOpen(true);
+  }, []);
 
   const pushToast = useCallback((type, text) => {
     const id = uid();
@@ -178,6 +188,29 @@ export default function App() {
     [streaming]
   );
 
+  const handleLeadSubmit = useCallback(
+    async (leadData) => {
+      const res = await api.submitLead(leadData);
+      pushToast("success", `Thank you, ${leadData.name}! Our team will contact you shortly.`);
+
+      // Push confirmation message into chat history
+      const botConfirmMsg = {
+        id: uid(),
+        role: "assistant",
+        content: `Thank you **${leadData.name}**! 🎉 Your request for a test drive / callback regarding **${leadData.model || "our vehicle lineup"}** has been received. Our sales consultant will reach out to you at **${leadData.phone}** shortly!`,
+        sources: [],
+        time: Date.now(),
+      };
+      setMessages((m) => [...m, botConfirmMsg]);
+      historyRef.current = [
+        ...historyRef.current,
+        { role: "assistant", content: botConfirmMsg.content },
+      ];
+      return res;
+    },
+    [pushToast]
+  );
+
   return (
     <div className="app">
       <Sidebar
@@ -201,12 +234,19 @@ export default function App() {
         onSend={handleSend}
         status={status}
         onNewChat={handleNewChat}
+        onOpenLeadModal={handleOpenLeadModal}
       />
       <Toasts toasts={toasts} />
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
+      />
+      <LeadModal
+        isOpen={isLeadModalOpen}
+        onClose={() => setIsLeadModalOpen(false)}
+        defaultModel={leadDefaultModel}
+        onSubmitSuccess={handleLeadSubmit}
       />
     </div>
   );

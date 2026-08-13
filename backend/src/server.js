@@ -10,6 +10,7 @@ import { ingestLocalFile, ingestUrl } from "./lib/ingest.js";
 import { deleteByIds, clearCollection, isChromaAvailable } from "./lib/vectorStore.js";
 import { listDocuments, removeDocument, clearDocuments, chunkIdsFor } from "./lib/registry.js";
 import { retrieveRelevantContext, streamAnswer, streamRefusal } from "./lib/rag.js";
+import { saveLead, getLeads } from "./lib/leads.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,6 +108,24 @@ app.post("/api/documents/clear", async (_req, res) => {
   }
   clearDocuments();
   res.json({ ok: true });
+});
+
+/* Leads: Submit callback / test drive lead details */
+app.post("/api/leads", async (req, res) => {
+  const { name, phone, email, model, notes } = req.body || {};
+  if (!name || !phone) {
+    return res.status(400).json({ error: "Name and Mobile number are required." });
+  }
+  try {
+    const result = await saveLead({ name, phone, email, model, notes });
+    res.json({ ok: true, lead: result.lead, googleSheet: result.googleSheet });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/leads", (_req, res) => {
+  res.json({ leads: getLeads() });
 });
 
 /* Chat (SSE streaming) */

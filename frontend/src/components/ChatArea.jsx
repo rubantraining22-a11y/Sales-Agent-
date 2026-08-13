@@ -32,7 +32,7 @@ const SpeechRecognition =
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null;
 
-export default function ChatArea({ messages, streaming, bgCar, onSend, status, onNewChat }) {
+export default function ChatArea({ messages, streaming, bgCar, onSend, status, onNewChat, onOpenLeadModal }) {
   const [draft, setDraft] = useState("");
   const [language, setLanguage] = useState("Auto");
   const [attachOpen, setAttachOpen] = useState(false);
@@ -143,6 +143,13 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
           </div>
         </div>
         <div className="chat-head-actions">
+          <button
+            className="btn btn-primary btn-sm lead-trigger-btn"
+            onClick={() => onOpenLeadModal?.()}
+            title="Book a Test Drive or Request Callback"
+          >
+            🚗 Book Test Drive / Callback
+          </button>
           <span className={`pill ${chromaDown ? "pill-warn" : "pill-ok"}`}>
             <i className="dot" />
             {chromaDown ? "Chroma offline" : "Chroma ready"}
@@ -167,7 +174,7 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
       <div className="chat-scroll" ref={scrollRef}>
         <div className="chat-inner">
           {messages.map((m) => (
-            <MessageBubble key={m.id} message={m} />
+            <MessageBubble key={m.id} message={m} onOpenLeadModal={onOpenLeadModal} />
           ))}
           {streaming && <TypingIndicator />}
         </div>

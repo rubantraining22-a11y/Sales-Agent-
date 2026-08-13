@@ -26,5 +26,7 @@ export const config = {
   uploadDir: path.join(__dirname, "../data/uploads"),
   dataDir: path.join(__dirname, "../data"),
   registryFile: path.join(__dirname, "../data/registry.json"),
+  leadsFile: path.join(__dirname, "../data/leads.json"),
+  googleSheetWebhookUrl: process.env.GOOGLE_SHEET_WEBHOOK_URL || "",
   maxHistoryTurns: 8,
 };

@@ -23,6 +23,15 @@ export const deleteDocument = (id) =>
 export const clearAll = () =>
   jsonFetch("/api/documents/clear", { method: "POST" });
 
+export const submitLead = (leadData) =>
+  jsonFetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(leadData),
+  });
+
+export const getLeads = () => jsonFetch("/api/leads");
+
 export async function uploadFiles(files) {
   const fd = new FormData();
   files.forEach((f) => fd.append("files", f));

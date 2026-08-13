@@ -60,14 +60,32 @@ function Content({ text }) {
   return <div className="msg-content">{out}</div>;
 }
 
-export default function MessageBubble({ message }) {
+export default function MessageBubble({ message, onOpenLeadModal }) {
   const isUser = message.role === "user";
+  const contentText = message.content || "";
+  const showsLeadAction =
+    !isUser &&
+    /test drive|price|cost|model|variant|feature|specification|color|buy|purchase|finance|warranty/i.test(
+      contentText
+    );
+
   return (
     <div className={`msg ${isUser ? "msg--user" : "msg--bot"}`}>
       {!isUser && <div className="msg-avatar">🛞</div>}
       <div className="msg-body">
         <div className={`bubble ${isUser ? "bubble--user" : "bubble--bot"}`}>
-          <Content text={message.content} />
+          <Content text={contentText} />
+          {showsLeadAction && (
+            <div className="msg-lead-card">
+              <span className="msg-lead-text">Interested in this vehicle?</span>
+              <button
+                className="btn btn-primary btn-xs msg-lead-btn"
+                onClick={() => onOpenLeadModal?.()}
+              >
+                🚗 Book Test Drive / Request Quote
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
