@@ -7,7 +7,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "npm install && npm install --prefix ../frontend && npm run build --prefix ../frontend",
+    "build": "npm install --include=optional sharp @img/sharp-linux-x64 && npm install --prefix ../frontend && npm run build --prefix ../frontend",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "ingest": "node src/scripts/ingest.js",
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
-    "@langchain/community": "^1.1.29",
     "@langchain/classic": "^1.0.41",
+    "@langchain/community": "^1.1.29",
     "@langchain/core": "^1.2.5",
     "@langchain/openai": "^1.5.6",
     "@langchain/textsplitters": "^1.0.1",
@@ -33,6 +33,6 @@
     "tesseract.js": "^7.0.0"
   },
   "optionalDependencies": {
-    "@img/sharp-linux-x64": "0.33.5"
+    "@img/sharp-linux-x64": "^0.33.5"
   }
 }
