@@ -91,16 +91,11 @@ npm run dev          # http://localhost:5173
 Open **http://localhost:5173**, upload a brochure from the sidebar (or paste a
 link) and start chatting. 🎉
 
-### 4 · Try it immediately with the sample brochure (optional)
+### 4 · Upload brochures and start chatting
 
-```bash
-cd backend
-npm run ingest -- ../sample-data/AutoBrochure_2026.txt
-```
+Open **http://localhost:5173**, upload your vehicle brochure (PDF, TXT, DOCX) or paste a brochure link from the sidebar, and start chatting. 🎉
 
-Now ask the agent: *"Which SUV models do you have?"*, *"What are the prices of the
-Sedan?"*, or *"What colors are available for the EV Car?"* — then try
-*"What is the capital of France?"* to see the guard politely decline.
+Now ask the agent: *"Which SUV models do you have?"*, *"What are the prices of the Sedan?"*, or *"What colors are available?"* — or ask an off-topic question like *"What is the capital of France?"* to see the guard politely decline.
 
 ---
 

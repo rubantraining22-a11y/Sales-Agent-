@@ -3,17 +3,20 @@ services:
   - type: web
     name: sales-agent-chroma
     runtime: docker
+    dockerfilePath: Dockerfile.chroma
     plan: free
     envVars:
       - key: IS_PERSISTENT
         value: "TRUE"
       - key: ALLOW_RESET
         value: "TRUE"
+      - key: ANONYMIZED_TELEMETRY
+        value: "FALSE"
 
-  # 2. Sales Agent Node.js Web Service (Full-stack App)
+  # 2. Sales Agent Full-stack Web Service (Backend + Frontend)
   - type: web
     name: sales-agent-app
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm run build
     startCommand: npm start
