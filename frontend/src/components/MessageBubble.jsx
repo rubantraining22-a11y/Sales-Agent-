@@ -1,19 +1,17 @@
+import React from "react";
+import { CarIcon, SparklesIcon } from "./Icons.jsx";
+
 /**
  * Tiny markdown-ish renderer: **bold**, `code`, bullet lines and links.
- * Keeps the UI dependency-free and fast while streaming.
  */
 function renderInline(text) {
   const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
     if (/^\*\*[^*]+\*\*$/.test(part)) {
-      return (
-        <strong key={i}>{part.slice(2, -2)}</strong>
-      );
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
     }
     if (/^`[^`]+`$/.test(part)) {
-      return (
-        <code key={i}>{part.slice(1, -1)}</code>
-      );
+      return <code key={i}>{part.slice(1, -1)}</code>;
     }
     const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (link) {
@@ -71,18 +69,23 @@ export default function MessageBubble({ message, onOpenLeadModal }) {
 
   return (
     <div className={`msg ${isUser ? "msg--user" : "msg--bot"}`}>
-      {!isUser && <div className="msg-avatar">🛞</div>}
+      {!isUser && (
+        <div className="msg-avatar">
+          <CarIcon size={18} />
+        </div>
+      )}
       <div className="msg-body">
         <div className={`bubble ${isUser ? "bubble--user" : "bubble--bot"}`}>
           <Content text={contentText} />
           {showsLeadAction && (
             <div className="msg-lead-card">
-              <span className="msg-lead-text">Interested in this vehicle?</span>
+              <span className="msg-lead-text">Interested in experiencing this vehicle?</span>
               <button
                 className="btn btn-primary btn-xs msg-lead-btn"
                 onClick={() => onOpenLeadModal?.()}
               >
-                🚗 Book Test Drive / Request Quote
+                <CarIcon size={14} />
+                <span>Book Test Drive / Request Quote</span>
               </button>
             </div>
           )}

@@ -1,4 +1,12 @@
 import { useRef, useState } from "react";
+import {
+  LockIcon,
+  UploadIcon,
+  FolderIcon,
+  LinkIcon,
+  AlertTriangleIcon,
+  ArrowRightIcon
+} from "./Icons.jsx";
 
 const ACCEPT = ".pdf,.docx,.txt,.md,.png,.jpg,.jpeg";
 
@@ -69,19 +77,26 @@ export default function UploadZone({
     }
   };
 
-  /* UNAUTHENTICATED: Show ONLY the Admin Login Form (Hide Uploads & Suggested Credentials Box) */
+  /* UNAUTHENTICATED: Show ONLY the Admin Login Form */
   if (!isAuthenticated) {
     return (
       <div className="upload-card inline-login-card">
         <div className="upload-title">
-          <span className="upload-ico">🔒</span>
+          <span className="upload-ico">
+            <LockIcon size={20} />
+          </span>
           <div>
-            <strong>Admin Login Required</strong>
-            <span>Log in to access document upload</span>
+            <strong>Admin Authentication</strong>
+            <span>Log in to manage knowledge base & vector store</span>
           </div>
         </div>
 
-        {loginError && <div className="login-error-msg">⚠️ {loginError}</div>}
+        {loginError && (
+          <div className="login-error-msg">
+            <AlertTriangleIcon size={16} />
+            <span>{loginError}</span>
+          </div>
+        )}
 
         <form onSubmit={handleLoginSubmit} className="inline-login-form">
           <div className="input-group">
@@ -90,7 +105,7 @@ export default function UploadZone({
               id="inline-username"
               type="text"
               className="input inline-input"
-              placeholder="Username"
+              placeholder="Username (Ruban)"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -102,14 +117,15 @@ export default function UploadZone({
               id="inline-password"
               type="password"
               className="input inline-input"
-              placeholder="••••••••"
+              placeholder="•••••••• (12345)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button type="submit" className="btn btn-primary btn-block">
-            Log In ➔
+            <span>Log In</span>
+            <ArrowRightIcon size={16} />
           </button>
         </form>
       </div>
@@ -120,10 +136,12 @@ export default function UploadZone({
   return (
     <div className="upload-card">
       <div className="upload-title">
-        <span className="upload-ico">🗂️</span>
+        <span className="upload-ico">
+          <FolderIcon size={20} />
+        </span>
         <div>
-          <strong>Knowledge base</strong>
-          <span>Feed the sales agent your brochures</span>
+          <strong>Knowledge Base Uploader</strong>
+          <span>Feed vector search engine vehicle brochures</span>
         </div>
       </div>
 
@@ -137,9 +155,11 @@ export default function UploadZone({
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
       >
-        <div className="dropzone-ico">📤</div>
+        <div className="dropzone-ico">
+          <UploadIcon size={28} />
+        </div>
         <p>
-          <strong>Drop files here</strong> or <em>click to browse</em>
+          <strong>Drop brochure files here</strong> or <em>click to browse</em>
         </p>
         <span className="dropzone-hint">
           {busy ? "Uploading…" : "PDF · DOCX · TXT · Images"}
@@ -158,13 +178,16 @@ export default function UploadZone({
       </div>
 
       <form className="link-row" onSubmit={submitLink}>
-        <input
-          className="input link-input"
-          type="url"
-          placeholder="Paste brochure link (https://…)"
-          value={linkUrl}
-          onChange={(e) => setLinkUrl(e.target.value)}
-        />
+        <div className="link-input-wrap">
+          <LinkIcon size={16} className="link-ico-prefix" />
+          <input
+            className="input link-input"
+            type="url"
+            placeholder="Paste brochure URL (https://…)"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+          />
+        </div>
         <button
           className="btn btn-primary btn-sm"
           type="submit"

@@ -2,6 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import MessageBubble from "./MessageBubble.jsx";
 import TypingIndicator from "./TypingIndicator.jsx";
 import { CAR_IMAGES } from "../cars.js";
+import {
+  CarIcon,
+  GlobeIcon,
+  PlusIcon,
+  ShieldIcon,
+  SendIcon,
+  MicIcon,
+  ChevronDownIcon,
+  SparklesIcon
+} from "./Icons.jsx";
 
 const LANGUAGES = [
   { code: "Auto", label: "Auto detect" },
@@ -32,12 +42,19 @@ const SpeechRecognition =
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null;
 
-export default function ChatArea({ messages, streaming, bgCar, onSend, status, onNewChat, onOpenLeadModal }) {
+export default function ChatArea({
+  messages,
+  streaming,
+  bgCar,
+  onSend,
+  onNewChat,
+  onOpenLeadModal,
+  onOpenAdminModal,
+}) {
   const [draft, setDraft] = useState("");
   const [language, setLanguage] = useState("Auto");
   const [attachOpen, setAttachOpen] = useState(false);
   const [listening, setListening] = useState(false);
-  const fileRef = useRef(null);
   const scrollRef = useRef(null);
   const taRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -127,8 +144,6 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
     }
   };
 
-  const chromaDown = !status.chroma;
-
   return (
     <main className="chat">
       <div className="chat-bg" key={bgCar} aria-hidden="true">
@@ -136,26 +151,27 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
       </div>
       <header className="chat-head glass">
         <div className="chat-head-info">
-          <div className="chat-avatar">🛞</div>
+          <div className="chat-avatar">
+            <CarIcon size={22} />
+          </div>
           <div>
-            <strong>SGA</strong>
-            <span className="chat-sub">Your car sales advisor</span>
+            <strong>SGA MOTORS</strong>
+            <span className="chat-sub">Your AI Vehicle Sales Advisor</span>
           </div>
         </div>
+
         <div className="chat-head-actions">
           <button
             className="btn btn-primary btn-sm lead-trigger-btn"
             onClick={() => onOpenLeadModal?.()}
             title="Book a Test Drive or Request Callback"
           >
-            🚗 Book Test Drive / Callback
+            <CarIcon size={16} />
+            <span>Book Test Drive / Callback</span>
           </button>
-          <span className={`pill ${chromaDown ? "pill-warn" : "pill-ok"}`}>
-            <i className="dot" />
-            {chromaDown ? "Chroma offline" : "Chroma ready"}
-          </span>
+
           <label className="lang-select" title="Answer language">
-            🌐
+            <GlobeIcon size={15} />
             <select value={language} onChange={(e) => setLanguage(e.target.value)}>
               {LANGUAGES.map((l) => (
                 <option key={l.code} value={l.code}>
@@ -163,16 +179,38 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
                 </option>
               ))}
             </select>
-            <span className="lang-caret">▾</span>
+            <ChevronDownIcon size={12} className="lang-caret" />
           </label>
-          <button className="btn btn-ghost btn-sm" onClick={onNewChat}>
-            ✦ New chat
+
+          <button className="btn btn-ghost btn-sm" onClick={onNewChat} title="Start new conversation">
+            <PlusIcon size={15} />
+            <span>New chat</span>
+          </button>
+
+          <button
+            className="btn btn-ghost btn-sm btn-admin-shortcut"
+            onClick={onOpenAdminModal}
+            title="Open Admin Portal & Vector DB Settings"
+          >
+            <ShieldIcon size={15} />
+            <span>Admin Portal</span>
           </button>
         </div>
       </header>
 
       <div className="chat-scroll" ref={scrollRef}>
         <div className="chat-inner">
+          {messages.length === 0 && (
+            <div className="welcome-banner glass">
+              <div className="welcome-avatar">
+                <CarIcon size={32} />
+              </div>
+              <h2>Welcome to SGA Motors Sales Experience</h2>
+              <p>
+                Ask about our 2026 vehicle lineup, key specifications, pricing, financing, warranty, or book a test drive!
+              </p>
+            </div>
+          )}
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} onOpenLeadModal={onOpenLeadModal} />
           ))}
@@ -184,17 +222,19 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
         <div className="composer glass">
           <button
             className="icon-btn composer-attach"
-            title="Upload a brochure"
+            title="Knowledge base documents managed via Admin Portal"
             onClick={() => {
               setAttachOpen(!attachOpen);
-              if (attachOpen) fileRef.current?.click();
             }}
           >
-            ＋
+            <PlusIcon size={18} />
           </button>
           {attachOpen && (
             <div className="attach-hint">
-              Use the sidebar to upload PDF, DOCX, TXT, images or links
+              <span>Brochures & URLs are managed via the </span>
+              <button className="attach-link-btn" onClick={onOpenAdminModal}>
+                Admin Portal
+              </button>
             </div>
           )}
           <textarea
@@ -222,32 +262,7 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
               onClick={toggleVoice}
               disabled={streaming}
             >
-              {listening ? (
-                <svg
-                  className="btn-mic-ico"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <rect x="6.5" y="6.5" width="11" height="11" rx="2.5" />
-                </svg>
-              ) : (
-                <svg
-                  className="btn-mic-ico"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <rect x="9" y="2.5" width="6" height="11.5" rx="3" />
-                  <path d="M5 11a7 7 0 0 0 14 0" />
-                  <path d="M12 18v3.5" />
-                  <path d="M8.5 21.5h7" />
-                </svg>
-              )}
+              <MicIcon size={18} />
             </button>
           )}
           {listening && (
@@ -265,15 +280,15 @@ export default function ChatArea({ messages, streaming, bgCar, onSend, status, o
           )}
           <button
             className="btn-send"
-            title="Send"
+            title="Send Message"
             disabled={!draft.trim() || streaming}
             onClick={submit}
           >
-            ➤
+            <SendIcon size={16} />
           </button>
         </div>
         <p className="composer-foot">
-          SGA only answers from the uploaded documents — off-topic questions are declined.
+          SGA Motors AI Advisor provides accurate answers based on our verified brochure catalog.
         </p>
       </footer>
     </main>

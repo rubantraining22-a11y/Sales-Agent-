@@ -24,12 +24,12 @@ export default function App() {
   const [streaming, setStreaming] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [bgCar, setBgCar] = useState(0);
-  
-  /* Auth State */
+
+  /* Auth State & Admin Portal Modal State */
   const [currentUser, setCurrentUser] = useState(
     () => localStorage.getItem("sga_user") || ""
   );
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const isAuthenticated = Boolean(currentUser);
 
   /* Lead Capture Modal State */
@@ -43,6 +43,10 @@ export default function App() {
     setIsLeadModalOpen(true);
   }, []);
 
+  const handleOpenAdminModal = useCallback(() => {
+    setIsAdminModalOpen(true);
+  }, []);
+
   const pushToast = useCallback((type, text) => {
     const id = uid();
     setToasts((t) => [...t, { id, type, text }]);
@@ -53,7 +57,7 @@ export default function App() {
     (username) => {
       setCurrentUser(username);
       localStorage.setItem("sga_user", username);
-      pushToast("success", `Welcome back, ${username}! Admin upload unlocked.`);
+      pushToast("success", `Welcome back, ${username}! Admin vector store unlocked.`);
     },
     [pushToast]
   );
@@ -142,14 +146,14 @@ export default function App() {
   }, []);
 
   const handleSend = useCallback(
-    async (text, language) => {
+    async (text, language = "Auto") => {
       const clean = (text || "").trim();
       if (!clean || streaming) return;
 
       const userMsg = { id: uid(), role: "user", content: clean, time: Date.now() };
       const botMsg = { id: uid(), role: "assistant", content: "", sources: [], time: Date.now() };
       setMessages((m) => [...m, userMsg, botMsg]);
-      setBgCar((i) => (i + 1) % CAR_IMAGES.length); // show next car animation in the background
+      setBgCar((i) => (i + 1) % CAR_IMAGES.length); // swap car background effect
       historyRef.current = [...historyRef.current, { role: "user", content: clean }];
       setStreaming(true);
 
@@ -197,7 +201,7 @@ export default function App() {
       const botConfirmMsg = {
         id: uid(),
         role: "assistant",
-        content: `Thank you **${leadData.name}**! 🎉 Your request for a test drive / callback regarding **${leadData.model || "our vehicle lineup"}** has been received. Our sales consultant will reach out to you at **${leadData.phone}** shortly!`,
+        content: `Thank you **${leadData.name}**! Your request for a test drive / callback regarding **${leadData.model || "our vehicle lineup"}** has been received. Our senior sales consultant will reach out to you at **${leadData.phone}** shortly!`,
         sources: [],
         time: Date.now(),
       };
@@ -214,33 +218,36 @@ export default function App() {
   return (
     <div className="app">
       <Sidebar
-        docs={docs}
-        status={status}
-        onUpload={handleFiles}
-        onLink={handleLink}
-        onDelete={handleDelete}
-        onClear={handleClear}
         onNewChat={handleNewChat}
         currentUser={currentUser}
         isAuthenticated={isAuthenticated}
-        onRequireLogin={() => setIsLoginModalOpen(true)}
-        onLoginSuccess={handleLoginSuccess}
-        onLogout={handleLogout}
+        onOpenAdminModal={handleOpenAdminModal}
+        onOpenLeadModal={handleOpenLeadModal}
+        onSendPrompt={handleSend}
       />
       <ChatArea
         messages={messages}
         streaming={streaming}
         bgCar={bgCar}
         onSend={handleSend}
-        status={status}
         onNewChat={handleNewChat}
         onOpenLeadModal={handleOpenLeadModal}
+        onOpenAdminModal={handleOpenAdminModal}
       />
       <Toasts toasts={toasts} />
       <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        currentUser={currentUser}
+        isAuthenticated={isAuthenticated}
         onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
+        status={status}
+        docs={docs}
+        onUpload={handleFiles}
+        onLink={handleLink}
+        onDelete={handleDelete}
+        onClear={handleClear}
       />
       <LeadModal
         isOpen={isLeadModalOpen}
@@ -251,4 +258,3 @@ export default function App() {
     </div>
   );
 }
-

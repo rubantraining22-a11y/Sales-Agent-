@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CarIcon, XIcon, CheckCircleIcon, AlertTriangleIcon } from "./Icons.jsx";
 
 export default function LeadModal({ isOpen, onClose, defaultModel = "", onSubmitSuccess }) {
   const [name, setName] = useState("");
@@ -59,13 +60,14 @@ export default function LeadModal({ isOpen, onClose, defaultModel = "", onSubmit
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-box lead-modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box lead-modal-box glass" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
-          ✕
+          <XIcon size={18} />
         </button>
 
         <div className="modal-header-badge">
-          <span>🚗</span> Test Drive & Callback Request
+          <CarIcon size={16} />
+          <span>Test Drive & Callback Request</span>
         </div>
 
         <h2 className="modal-title">Experience Your Next Car</h2>
@@ -73,7 +75,12 @@ export default function LeadModal({ isOpen, onClose, defaultModel = "", onSubmit
           Share your details below to schedule a test drive, get instant pricing quotes, or request a call back from our senior sales consultant.
         </p>
 
-        {error && <div className="modal-error-alert">{error}</div>}
+        {error && (
+          <div className="modal-error-alert">
+            <AlertTriangleIcon size={16} />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
