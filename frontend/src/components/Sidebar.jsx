@@ -2,8 +2,6 @@ import React from "react";
 import {
   CarIcon,
   SparklesIcon,
-  ShieldIcon,
-  UserIcon,
   PlusIcon,
   HelpCircleIcon,
   ArrowRightIcon
@@ -18,9 +16,6 @@ const QUICK_PROMPTS = [
 
 export default function Sidebar({
   onNewChat,
-  currentUser,
-  isAuthenticated,
-  onOpenAdminModal,
   onOpenLeadModal,
   onSendPrompt,
 }) {
@@ -78,26 +73,7 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Admin Portal Launcher Bar (Separate Admin access) */}
-      <div className="sidebar-admin-launcher">
-        <button
-          className={`admin-launcher-btn ${isAuthenticated ? "admin-launcher-btn--authed" : ""}`}
-          onClick={onOpenAdminModal}
-        >
-          <div className="admin-btn-content">
-            <ShieldIcon size={16} />
-            <div className="admin-btn-text">
-              <strong>Admin Portal</strong>
-              <span>
-                {isAuthenticated ? `Logged in: ${currentUser}` : "Access Knowledge Base & Vector DB"}
-              </span>
-            </div>
-          </div>
-          <ArrowRightIcon size={14} />
-        </button>
-      </div>
-
-      {/* Sidebar Footer */}
+      {/* Customer Sidebar Footer */}
       <div className="sidebar-foot">
         <span className="foot-dot" />
         <span>SGA Motors AI Sales Experience · 2026</span>

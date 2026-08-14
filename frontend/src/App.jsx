@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatArea from "./components/ChatArea.jsx";
 import Toasts from "./components/Toasts.jsx";
-import LoginModal from "./components/LoginModal.jsx";
 import LeadModal from "./components/LeadModal.jsx";
+import AdminPage from "./components/AdminPage.jsx";
 import * as api from "./api.js";
 import { CAR_IMAGES } from "./cars.js";
 
@@ -11,6 +11,14 @@ const uid = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+function checkIsAdminRoute() {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
+  const search = window.location.search.toLowerCase();
+  return path.startsWith("/admin") || hash === "#admin" || search.includes("admin=true");
+}
 
 export default function App() {
   const [docs, setDocs] = useState([]);
@@ -25,11 +33,13 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [bgCar, setBgCar] = useState(0);
 
-  /* Auth State & Admin Portal Modal State */
+  /* Separate Route State: "customer" vs "admin" */
+  const [view, setView] = useState(() => (checkIsAdminRoute() ? "admin" : "customer"));
+
+  /* Auth State */
   const [currentUser, setCurrentUser] = useState(
     () => localStorage.getItem("sga_user") || ""
   );
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const isAuthenticated = Boolean(currentUser);
 
   /* Lead Capture Modal State */
@@ -38,13 +48,36 @@ export default function App() {
 
   const historyRef = useRef([]);
 
+  // Listen to browser navigation changes
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setView(checkIsAdminRoute() ? "admin" : "customer");
+    };
+    window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("hashchange", handleLocationChange);
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("hashchange", handleLocationChange);
+    };
+  }, []);
+
+  const navigateToAdmin = useCallback(() => {
+    if (window.location.pathname !== "/admin") {
+      window.history.pushState({}, "", "/admin");
+    }
+    setView("admin");
+  }, []);
+
+  const navigateToCustomer = useCallback(() => {
+    if (window.location.pathname !== "/") {
+      window.history.pushState({}, "", "/");
+    }
+    setView("customer");
+  }, []);
+
   const handleOpenLeadModal = useCallback((modelName = "") => {
     setLeadDefaultModel(modelName);
     setIsLeadModalOpen(true);
-  }, []);
-
-  const handleOpenAdminModal = useCallback(() => {
-    setIsAdminModalOpen(true);
   }, []);
 
   const pushToast = useCallback((type, text) => {
@@ -153,7 +186,7 @@ export default function App() {
       const userMsg = { id: uid(), role: "user", content: clean, time: Date.now() };
       const botMsg = { id: uid(), role: "assistant", content: "", sources: [], time: Date.now() };
       setMessages((m) => [...m, userMsg, botMsg]);
-      setBgCar((i) => (i + 1) % CAR_IMAGES.length); // swap car background effect
+      setBgCar((i) => (i + 1) % CAR_IMAGES.length);
       historyRef.current = [...historyRef.current, { role: "user", content: clean }];
       setStreaming(true);
 
@@ -197,7 +230,6 @@ export default function App() {
       const res = await api.submitLead(leadData);
       pushToast("success", `Thank you, ${leadData.name}! Our team will contact you shortly.`);
 
-      // Push confirmation message into chat history
       const botConfirmMsg = {
         id: uid(),
         role: "assistant",
@@ -215,13 +247,33 @@ export default function App() {
     [pushToast]
   );
 
+  /* SEPARATE ADMIN PAGE VIEW */
+  if (view === "admin") {
+    return (
+      <div className="app app--admin-page">
+        <AdminPage
+          currentUser={currentUser}
+          isAuthenticated={isAuthenticated}
+          onLoginSuccess={handleLoginSuccess}
+          onLogout={handleLogout}
+          status={status}
+          docs={docs}
+          onUpload={handleFiles}
+          onLink={handleLink}
+          onDelete={handleDelete}
+          onClear={handleClear}
+          onGoToCustomerView={navigateToCustomer}
+        />
+        <Toasts toasts={toasts} />
+      </div>
+    );
+  }
+
+  /* PURE CUSTOMER UI VIEW (NO Admin Portal buttons anywhere) */
   return (
     <div className="app">
       <Sidebar
         onNewChat={handleNewChat}
-        currentUser={currentUser}
-        isAuthenticated={isAuthenticated}
-        onOpenAdminModal={handleOpenAdminModal}
         onOpenLeadModal={handleOpenLeadModal}
         onSendPrompt={handleSend}
       />
@@ -232,23 +284,8 @@ export default function App() {
         onSend={handleSend}
         onNewChat={handleNewChat}
         onOpenLeadModal={handleOpenLeadModal}
-        onOpenAdminModal={handleOpenAdminModal}
       />
       <Toasts toasts={toasts} />
-      <LoginModal
-        isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        currentUser={currentUser}
-        isAuthenticated={isAuthenticated}
-        onLoginSuccess={handleLoginSuccess}
-        onLogout={handleLogout}
-        status={status}
-        docs={docs}
-        onUpload={handleFiles}
-        onLink={handleLink}
-        onDelete={handleDelete}
-        onClear={handleClear}
-      />
       <LeadModal
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}

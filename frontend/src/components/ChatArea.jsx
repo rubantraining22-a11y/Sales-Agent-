@@ -6,11 +6,9 @@ import {
   CarIcon,
   GlobeIcon,
   PlusIcon,
-  ShieldIcon,
   SendIcon,
   MicIcon,
-  ChevronDownIcon,
-  SparklesIcon
+  ChevronDownIcon
 } from "./Icons.jsx";
 
 const LANGUAGES = [
@@ -49,7 +47,6 @@ export default function ChatArea({
   onSend,
   onNewChat,
   onOpenLeadModal,
-  onOpenAdminModal,
 }) {
   const [draft, setDraft] = useState("");
   const [language, setLanguage] = useState("Auto");
@@ -186,15 +183,6 @@ export default function ChatArea({
             <PlusIcon size={15} />
             <span>New chat</span>
           </button>
-
-          <button
-            className="btn btn-ghost btn-sm btn-admin-shortcut"
-            onClick={onOpenAdminModal}
-            title="Open Admin Portal & Vector DB Settings"
-          >
-            <ShieldIcon size={15} />
-            <span>Admin Portal</span>
-          </button>
         </div>
       </header>
 
@@ -220,23 +208,6 @@ export default function ChatArea({
 
       <footer className="composer-wrap">
         <div className="composer glass">
-          <button
-            className="icon-btn composer-attach"
-            title="Knowledge base documents managed via Admin Portal"
-            onClick={() => {
-              setAttachOpen(!attachOpen);
-            }}
-          >
-            <PlusIcon size={18} />
-          </button>
-          {attachOpen && (
-            <div className="attach-hint">
-              <span>Brochures & URLs are managed via the </span>
-              <button className="attach-link-btn" onClick={onOpenAdminModal}>
-                Admin Portal
-              </button>
-            </div>
-          )}
           <textarea
             ref={taRef}
             className="composer-input"
