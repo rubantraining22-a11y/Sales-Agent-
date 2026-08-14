@@ -96,7 +96,7 @@ export default function LoginModal({
                   id="login-username"
                   type="text"
                   className="input"
-                  placeholder="Username (Ruban)"
+                  placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoFocus
@@ -109,7 +109,7 @@ export default function LoginModal({
                   id="login-password"
                   type="password"
                   className="input"
-                  placeholder="•••••••• (12345)"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />

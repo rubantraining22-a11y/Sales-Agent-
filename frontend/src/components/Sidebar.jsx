@@ -4,7 +4,8 @@ import {
   SparklesIcon,
   PlusIcon,
   HelpCircleIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  LockIcon
 } from "./Icons.jsx";
 
 const QUICK_PROMPTS = [
@@ -18,6 +19,7 @@ export default function Sidebar({
   onNewChat,
   onOpenLeadModal,
   onSendPrompt,
+  onOpenAdminModal,
 }) {
   return (
     <aside className="sidebar glass">
@@ -73,10 +75,19 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Customer Sidebar Footer */}
+      {/* Customer Sidebar Footer with subtle Admin Portal trigger */}
       <div className="sidebar-foot">
         <span className="foot-dot" />
         <span>SGA Motors AI Sales Experience · 2026</span>
+        {onOpenAdminModal && (
+          <button
+            className="icon-btn icon-btn--subtle admin-trigger-btn"
+            title="Admin Login Sheet"
+            onClick={onOpenAdminModal}
+          >
+            <LockIcon size={14} />
+          </button>
+        )}
       </div>
     </aside>
   );

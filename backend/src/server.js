@@ -153,7 +153,10 @@ app.post("/api/chat", async (req, res) => {
   }, 15000);
 
   try {
-    const { docs } = await retrieveRelevantContext(message);
+    const { docs } = await retrieveRelevantContext(message).catch((err) => {
+      console.warn("[sales-agent] Chroma DB offline/error, falling back to direct LLM:", err.message);
+      return { docs: [] };
+    });
     const sources = [...new Set(docs.map((d) => d.metadata?.source || "document"))];
     send({ sources });
 

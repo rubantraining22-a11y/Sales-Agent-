@@ -105,7 +105,7 @@ export default function UploadZone({
               id="inline-username"
               type="text"
               className="input inline-input"
-              placeholder="Username (Ruban)"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -117,7 +117,7 @@ export default function UploadZone({
               id="inline-password"
               type="password"
               className="input inline-input"
-              placeholder="•••••••• (12345)"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
